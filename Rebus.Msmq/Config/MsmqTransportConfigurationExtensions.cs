@@ -1,9 +1,9 @@
-﻿using Rebus.Config;
-using Rebus.Legacy;
+﻿using Rebus.Legacy;
 using Rebus.Logging;
+using Rebus.Msmq;
 using Rebus.Transport;
 
-namespace Rebus.Msmq
+namespace Rebus.Config
 {
     /// <summary>
     /// Configuration extensions for the MSMQ transport

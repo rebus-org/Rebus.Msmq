@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Messaging;
+using Rebus.Msmq;
 
-namespace Rebus.Msmq
+namespace Rebus.Config
 {
     /// <summary>
     /// MSMQ configuration builder that can be used to customize how certain MSMQ operations are performed
