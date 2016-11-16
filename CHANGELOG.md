@@ -11,3 +11,7 @@
 ## 2.0.0
 
 * Release 2.0.0
+
+## 2.0.1
+
+* Fix bug where `MessageQueueTransaction` was committed in the wrong place. Could lead to subtle race conditions between the user's code and the MSMQ transaction when adding `OnCommitted(...)` callbacks to the transaction context

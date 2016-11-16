@@ -195,7 +195,7 @@ namespace Rebus.Msmq
 
             if (context.Items.ContainsKey(CurrentTransactionKey))
             {
-                throw new InvalidOperationException("Tried to receive with an already existing MSMQ queue transaction - while that is possible, it's an indication that something is wrong!");
+                throw new InvalidOperationException("Tried to receive with an already existing MSMQ queue transaction - although it is possible with MSMQ to do so, with Rebus it is an indication that something is wrong!");
             }
 
             var messageQueueTransaction = new MessageQueueTransaction();
@@ -214,7 +214,7 @@ namespace Rebus.Msmq
                     return null;
                 }
 
-                context.OnCommitted(async () => messageQueueTransaction.Commit());
+                context.OnCompleted(async () => messageQueueTransaction.Commit());
                 context.OnDisposed(() => message.Dispose());
 
                 var headers = _extensionSerializer.Deserialize(message.Extension);
