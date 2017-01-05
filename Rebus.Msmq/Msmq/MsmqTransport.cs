@@ -41,7 +41,7 @@ namespace Rebus.Msmq
         {
             if (rebusLoggerFactory == null) throw new ArgumentNullException(nameof(rebusLoggerFactory));
 
-            _log = rebusLoggerFactory.GetCurrentClassLogger();
+            _log = rebusLoggerFactory.GetLogger<MsmqTransport>();
 
             if (inputQueueAddress != null)
             {
@@ -359,22 +359,15 @@ namespace Rebus.Msmq
         class ExtensionSerializer
         {
             readonly HeaderSerializer _utf8HeaderSerializer = new HeaderSerializer { Encoding = Encoding.UTF8 };
-            readonly HeaderSerializer _utf7HeaderSerializer = new HeaderSerializer { Encoding = Encoding.UTF7 };
-
-            public bool UseLegacyEncoding { get; set; }
 
             public byte[] Serialize(Dictionary<string, string> headers)
             {
-                return UseLegacyEncoding
-                    ? _utf7HeaderSerializer.Serialize(headers)
-                    : _utf8HeaderSerializer.Serialize(headers);
+                return _utf8HeaderSerializer.Serialize(headers);
             }
 
             public Dictionary<string, string> Deserialize(byte[] bytes)
             {
-                return IsUtf7(bytes)
-                    ? _utf7HeaderSerializer.Deserialize(bytes)
-                    : _utf8HeaderSerializer.Deserialize(bytes);
+                return _utf8HeaderSerializer.Deserialize(bytes);
             }
 
             static bool IsUtf7(byte[] bytes)
@@ -403,14 +396,6 @@ namespace Rebus.Msmq
             {
                 _disposed = true;
             }
-        }
-
-        /// <summary>
-        /// Configures the transport to serialize headers in "legacy mode", which means that they're UTF7-encoded and not UTF8
-        /// </summary>
-        public void UseLegacyHeaderSerialization()
-        {
-            _extensionSerializer.UseLegacyEncoding = true;
         }
     }
 }

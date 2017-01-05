@@ -488,10 +488,9 @@ namespace Rebus.Msmq.Tests
                 .ToList()
                 .ForEach(msg =>
                 {
-                    using (var context = new DefaultTransactionContext())
+                    using (var context = new DefaultTransactionContextScope())
                     {
-                        transport.Send(QueueName, TransportMessageHelpers.FromString(JsonConvert.SerializeObject(msg)),
-                            context).Wait();
+                        transport.Send(QueueName, TransportMessageHelpers.FromString(JsonConvert.SerializeObject(msg)), AmbientTransactionContext.Current).Wait();
 
                         context.Complete().Wait();
 

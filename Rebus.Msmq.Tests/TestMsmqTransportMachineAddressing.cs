@@ -102,9 +102,9 @@ namespace Rebus.Msmq.Tests
 
         string Receive()
         {
-            using (var context = new DefaultTransactionContext())
+            using (var context = new DefaultTransactionContextScope())
             {
-                var transportMessage = _transport.Receive(context, _cancellationToken).Result;
+                var transportMessage = _transport.Receive(AmbientTransactionContext.Current, _cancellationToken).Result;
 
                 context.Complete().Wait();
 
@@ -119,9 +119,9 @@ namespace Rebus.Msmq.Tests
         {
             Console.WriteLine("Sending to {0}", destinationAddress);
 
-            using (var transactionContext = new DefaultTransactionContext())
+            using (var transactionContext = new DefaultTransactionContextScope())
             {
-                _transport.Send(destinationAddress, NewMessage(message), transactionContext).Wait();
+                _transport.Send(destinationAddress, NewMessage(message), AmbientTransactionContext.Current).Wait();
                 transactionContext.Complete().Wait();
             }
         }
