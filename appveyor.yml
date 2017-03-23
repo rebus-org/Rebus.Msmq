@@ -1,5 +1,17 @@
-before_build:
-  - nuget restore
+image: Visual Studio 2017
 
 services:
   - msmq
+
+shallow_clone: true
+
+cache:
+  - packages -> **\packages.config
+  - '%LocalAppData%\NuGet\Cache'
+
+before_build:
+  - appveyor-retry dotnet restore -v Minimal
+
+build_script:
+  - dotnet build Rebus.Msmq -c Release 
+  - dotnet build Rebus.Msmq.Tests -c Release 

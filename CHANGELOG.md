@@ -20,3 +20,8 @@
 
 * Update to Rebus 3
 * Remove weird legacy mode UTF7 stuff
+
+## 4.0.0-b01
+
+* Update to Rebus 4
+* Add .NET Core support
