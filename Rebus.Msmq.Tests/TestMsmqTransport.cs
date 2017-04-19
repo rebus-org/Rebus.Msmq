@@ -488,11 +488,11 @@ namespace Rebus.Msmq.Tests
                 .ToList()
                 .ForEach(msg =>
                 {
-                    using (var context = new DefaultTransactionContextScope())
+                    using (var scope = new RebusTransactionScope())
                     {
-                        transport.Send(QueueName, TransportMessageHelpers.FromString(JsonConvert.SerializeObject(msg)), AmbientTransactionContext.Current).Wait();
+                        transport.Send(QueueName, TransportMessageHelpers.FromString(JsonConvert.SerializeObject(msg)), scope.TransactionContext).Wait();
 
-                        context.Complete().Wait();
+                        scope.Complete();
 
                         sendIds.Add(msg.Id);
                     }
