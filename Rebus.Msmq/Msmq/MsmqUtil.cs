@@ -219,5 +219,37 @@ If Rebus allowed you to work with non-transactional queues, it would not be able
                    || queueInfo.MachineName == "."
                    || queueInfo.MachineName.Equals(Environment.MachineName, StringComparison.InvariantCultureIgnoreCase);
         }
+
+        /// <summary>
+        /// Gets the number of messages from the queue with the given <paramref name="path"/>
+        /// </summary>
+        public static int GetCount(string path)
+        {
+            using (var queue = new MessageQueue(path))
+            {
+                return GetCount(queue);
+            }
+
+            //return (int)MessageQueueExtensions.GetCount(path);
+        }
+
+        static int GetCount(MessageQueue queue)
+        {
+            try
+            {
+                var count = 0;
+
+                using (var enumerator = queue.GetMessageEnumerator2())
+                {
+                    while (enumerator.MoveNext()) count++;
+
+                    return count;
+                }
+            }
+            catch
+            {
+                return 0;
+            }
+        }
     }
 }

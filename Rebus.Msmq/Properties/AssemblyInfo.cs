@@ -36,3 +36,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("$version$")]
 [assembly: AssemblyFileVersion("$version$")]
+[assembly: InternalsVisibleTo("Rebus.Msmq.Tests")]
