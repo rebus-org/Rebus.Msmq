@@ -4,6 +4,9 @@ using System.Runtime.InteropServices;
 
 namespace Rebus.Msmq
 {
+    /// <summary>
+    /// http://functionalflow.co.uk/blog/2008/08/27/counting-the-number-of-messages-in-a-message-queue-in/
+    /// </summary>
     static class MessageQueueExtensions
     {
         [DllImport("mqrt.dll")]
