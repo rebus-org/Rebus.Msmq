@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Messaging" />
-    <PackageReference Include="rebus" Version="4.0.0-b08" />
+    <PackageReference Include="rebus" Version="4.0.0-b09" />
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="$(ProjectDir)..\scripts\patch_assemblyinfo.cmd $(ProjectDir)" />
