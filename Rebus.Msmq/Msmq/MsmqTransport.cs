@@ -174,7 +174,7 @@ namespace Rebus.Msmq
             }
             catch (Exception exception)
             {
-                throw new RebusApplicationException(exception, $"Could not sent to MSMQ queue with path '{sendQueue.Path}'");
+                throw new RebusApplicationException(exception, $"Could not send to MSMQ queue with path '{sendQueue.Path}'");
             }
         }
 
