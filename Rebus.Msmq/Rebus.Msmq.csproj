@@ -54,7 +54,7 @@
     <None Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="rebus" Version="4.0.0-b16" />
+    <PackageReference Include="rebus" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Messaging" />

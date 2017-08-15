@@ -37,6 +37,6 @@
     <Reference Include="System.Messaging" />
     <ProjectReference Include="..\Rebus.Msmq\Rebus.Msmq.csproj" />
     <PackageReference Include="nunit" Version="3.7.1" />
-    <PackageReference Include="rebus.tests.contracts" Version="4.0.0-b16" />
+    <PackageReference Include="rebus.tests.contracts" Version="4.0.0" />
   </ItemGroup>
 </Project>
