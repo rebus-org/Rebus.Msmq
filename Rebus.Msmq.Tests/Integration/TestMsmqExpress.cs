@@ -15,7 +15,7 @@ using Rebus.Tests.Contracts;
 
 namespace Rebus.Msmq.Tests.Integration
 {
-    [TestFixture, Category(Categories.Msmq)]
+    [TestFixture]
     public class TestMsmqExpress : FixtureBase
     {
         BuiltinHandlerActivator _activator;

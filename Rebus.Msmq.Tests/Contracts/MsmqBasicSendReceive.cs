@@ -3,6 +3,6 @@ using Rebus.Tests.Contracts.Transports;
 
 namespace Rebus.Msmq.Tests.Contracts
 {
-    [TestFixture, Category(Categories.Msmq)]
+    [TestFixture]
     public class MsmqBasicSendReceive : BasicSendReceive<MsmqTransportFactory> { }
 }

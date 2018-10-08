@@ -14,7 +14,7 @@ using Rebus.Tests.Contracts;
 
 namespace Rebus.Msmq.Tests.Integration
 {
-    [TestFixture, Category(Categories.Msmq)]
+    [TestFixture]
     public class TestReceivePerformance : FixtureBase
     {
         static readonly string InputQueueName = TestConfig.GetName("test.performance.input");
@@ -29,7 +29,7 @@ namespace Rebus.Msmq.Tests.Integration
             MsmqUtil.Delete(InputQueueName);
         }
 
-        [TestCase(10000, 5, Ignore = "takes a long time")]
+        [TestCase(10000, 5)]
         [TestCase(100, 5)]
         public async Task NizzleName(int numberOfMessages, int numberOfWorkers)
         {

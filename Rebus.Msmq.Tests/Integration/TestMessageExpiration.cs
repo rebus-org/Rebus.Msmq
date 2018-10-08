@@ -13,7 +13,7 @@ using Rebus.Tests.Contracts;
 
 namespace Rebus.Msmq.Tests.Integration
 {
-    [TestFixture, Category(Categories.Msmq)]
+    [TestFixture]
     public class TestMessageExpiration : FixtureBase
     {
         readonly string _inputQueueName = TestConfig.GetName("expiration");
