@@ -5,8 +5,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rebus.Msmq.Tests</RootNamespace>
     <AssemblyName>Rebus.Msmq.Tests</AssemblyName>
-    <TargetFrameworks>net45</TargetFrameworks>
-    <!--<TargetFrameworks>net45;netstandard1.6</TargetFrameworks>-->
+    <TargetFrameworks>net45;net46</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -27,16 +26,12 @@
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <DefineConstants>NET45</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.6' ">
-    <DefineConstants>NETSTANDARD1_6</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Messaging" />
     <ProjectReference Include="..\Rebus.Msmq\Rebus.Msmq.csproj" />
-    <PackageReference Include="nunit" Version="3.7.1" />
-    <PackageReference Include="rebus.tests.contracts" Version="4.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="nunit" Version="3.10.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
+    <PackageReference Include="rebus.tests.contracts" Version="5.0.0" />
   </ItemGroup>
 </Project>

@@ -79,8 +79,7 @@ namespace Rebus.Msmq
 
         static bool IsByte(string str)
         {
-            byte temp;
-            return byte.TryParse(str, out temp);
+            return byte.TryParse(str, out _);
         }
 
         class QueueInfo

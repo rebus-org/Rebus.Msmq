@@ -253,9 +253,7 @@ namespace Rebus.Msmq
             var headers = message.Headers;
 
             var expressDelivery = headers.ContainsKey(Headers.Express);
-
-            string timeToBeReceivedStr;
-            var hasTimeout = headers.TryGetValue(Headers.TimeToBeReceived, out timeToBeReceivedStr);
+            var hasTimeout = headers.TryGetValue(Headers.TimeToBeReceived, out var timeToBeReceivedStr);
 
             var msmqMessage = new Message
             {
@@ -368,15 +366,6 @@ namespace Rebus.Msmq
             public Dictionary<string, string> Deserialize(byte[] bytes)
             {
                 return _utf8HeaderSerializer.Deserialize(bytes);
-            }
-
-            static bool IsUtf7(byte[] bytes)
-            {
-                // auto-detect UTF7-encoded headers
-                // 43, 65, 72, 115 == an UTF7-encoded '{'
-                if (bytes.Length < 4) return false;
-
-                return bytes[0] == 43 && bytes[1] == 65 && bytes[2] == 72 && bytes[3] == 115;
             }
         }
 

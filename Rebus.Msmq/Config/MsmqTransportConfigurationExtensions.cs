@@ -1,4 +1,5 @@
-﻿using Rebus.Logging;
+﻿using System;
+using Rebus.Logging;
 using Rebus.Msmq;
 using Rebus.Transport;
 
@@ -14,6 +15,9 @@ namespace Rebus.Config
         /// </summary>
         public static MsmqTransportConfigurationBuilder UseMsmq(this StandardConfigurer<ITransport> configurer, string inputQueueName)
         {
+            if (configurer == null) throw new ArgumentNullException(nameof(configurer));
+            if (inputQueueName == null) throw new ArgumentNullException(nameof(inputQueueName));
+
             var builder = new MsmqTransportConfigurationBuilder();
 
             configurer.Register(c =>
@@ -32,6 +36,8 @@ namespace Rebus.Config
         /// </summary>
         public static MsmqTransportConfigurationBuilder UseMsmqAsOneWayClient(this StandardConfigurer<ITransport> configurer)
         {
+            if (configurer == null) throw new ArgumentNullException(nameof(configurer));
+
             var builder = new MsmqTransportConfigurationBuilder();
 
             configurer.Register(c =>

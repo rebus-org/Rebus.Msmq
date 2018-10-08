@@ -26,3 +26,8 @@
 * Update to Rebus 4
 * Add .NET Core support
 * Fix typo ;)
+
+## 5.0.0
+
+* Update to Rebus 5
+* Target .NET 4.5 and .NET 4.6
