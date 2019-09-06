@@ -22,7 +22,7 @@ namespace Rebus.Msmq.Tests
 
         protected override void SetUp()
         {
-            _transport = new MsmqTransport(_queueName, new ConsoleLoggerFactory(true));
+            _transport = new MsmqTransport(_queueName, new ConsoleLoggerFactory(true), new ExtensionHeaderSerializer());
             _transport.CreateQueue(_queueName);
 
             Using(_transport);

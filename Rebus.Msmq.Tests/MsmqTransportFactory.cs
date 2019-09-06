@@ -19,7 +19,7 @@ namespace Rebus.Msmq.Tests
 
         public ITransport Create(string inputQueueAddress)
         {
-            var transport = new MsmqTransport(inputQueueAddress, new ConsoleLoggerFactory(true));
+            var transport = new MsmqTransport(inputQueueAddress, new ConsoleLoggerFactory(true), new ExtensionHeaderSerializer());
 
             _disposables.Add(transport);
 

@@ -27,7 +27,7 @@ namespace Rebus.Msmq
         const string CurrentTransactionKey = "msmqtransport-messagequeuetransaction";
         const string CurrentOutgoingQueuesKey = "msmqtransport-outgoing-messagequeues";
         readonly List<Action<MessageQueue>> _newQueueCallbacks = new List<Action<MessageQueue>>();
-        readonly ExtensionSerializer _extensionSerializer = new ExtensionSerializer();
+        private readonly IMsmqHeaderSerializer _msmqHeaderSerializer;
         readonly string _inputQueueName;
         readonly ILog _log;
 
@@ -37,9 +37,10 @@ namespace Rebus.Msmq
         /// <summary>
         /// Constructs the transport with the specified input queue address
         /// </summary>
-        public MsmqTransport(string inputQueueAddress, IRebusLoggerFactory rebusLoggerFactory)
+        public MsmqTransport(string inputQueueAddress, IRebusLoggerFactory rebusLoggerFactory, IMsmqHeaderSerializer msmqHeaderSerializer)
         {
             if (rebusLoggerFactory == null) throw new ArgumentNullException(nameof(rebusLoggerFactory));
+            _msmqHeaderSerializer = msmqHeaderSerializer ?? throw new ArgumentNullException(nameof(msmqHeaderSerializer));
 
             _log = rebusLoggerFactory.GetLogger<MsmqTransport>();
 
@@ -217,7 +218,7 @@ namespace Rebus.Msmq
                 context.OnCompleted(async () => messageQueueTransaction.Commit());
                 context.OnDisposed(() => message.Dispose());
 
-                var headers = _extensionSerializer.Deserialize(message.Extension);
+                var headers = _msmqHeaderSerializer.Deserialize(message);
                 var body = new byte[message.BodyStream.Length];
 
                 await message.BodyStream.ReadAsync(body, 0, body.Length, cancellationToken);
@@ -257,13 +258,14 @@ namespace Rebus.Msmq
 
             var msmqMessage = new Message
             {
-                Extension = _extensionSerializer.Serialize(headers),
                 BodyStream = new MemoryStream(message.Body),
                 UseJournalQueue = false,
                 Recoverable = !expressDelivery,
                 UseDeadLetterQueue = !(expressDelivery || hasTimeout),
                 Label = GetMessageLabel(message),
             };
+
+            _msmqHeaderSerializer.SerializeToMessage(headers, msmqMessage);
 
             if (hasTimeout)
             {

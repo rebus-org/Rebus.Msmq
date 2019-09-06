@@ -478,7 +478,7 @@ namespace Rebus.Msmq.Tests
 
         static List<int> SendMessages(int messageCount)
         {
-            var transport = new MsmqTransport(QueueName, new ConsoleLoggerFactory(true));
+            var transport = new MsmqTransport(QueueName, new ConsoleLoggerFactory(true), new ExtensionHeaderSerializer());
 
             MsmqUtil.EnsureQueueExists(MsmqUtil.GetPath(QueueName));
 

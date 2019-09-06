@@ -7,7 +7,7 @@ namespace Rebus.Msmq.Tests.Contracts
     {
         public TransportAndInspector Create(string address)
         {
-            var transport = new MsmqTransport(address, new ConsoleLoggerFactory(false));
+            var transport = new MsmqTransport(address, new ConsoleLoggerFactory(false), new ExtensionHeaderSerializer());
             var transportInspector = new MsmqTransportInspector(address);
 
             return new TransportAndInspector(transport, transportInspector);
