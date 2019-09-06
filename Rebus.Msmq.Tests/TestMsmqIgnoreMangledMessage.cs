@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Messaging;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Rebus.Activation;
 using Rebus.Config;
 using Rebus.Messages;
+using Rebus.Serialization;
 using Rebus.Tests.Contracts;
 using Message = System.Messaging.Message;
 
@@ -16,7 +18,7 @@ namespace Rebus.Msmq.Tests
     [Description("Verify that serializer can ignore mangled message")]
     public class TestMsmqIgnoreMangledMessage : FixtureBase
     {
-        readonly string _inputQueueName = TestConfig.GetName("mangled-message");
+        readonly string _inputQueueName = TestConfig.GetName("handled-mangled-message");
 
         protected override void SetUp()
         {
@@ -28,6 +30,7 @@ namespace Rebus.Msmq.Tests
                 {
                     opt.Decorate<IMsmqHeaderSerializer>(p => new MangledMessageIngoreSerializer());
                 })
+                .Serialization(c => c.Register(_ => new StaticMessageDeserializer()))
                 .Start();
         }
 
@@ -58,6 +61,20 @@ namespace Rebus.Msmq.Tests
 
                 Assert.Catch<MessageQueueException>(() => messageQueue.Receive(TimeSpan.FromSeconds(2)));
             }
+        }
+    }
+
+    public class StaticMessageDeserializer : ISerializer
+    {
+        public Task<TransportMessage> Serialize(Messages.Message message)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Rebus.Messages.Message> Deserialize(TransportMessage transportMessage)
+        {
+            var msg = new Messages.Message(transportMessage.Headers, "test");
+            return Task.FromResult(msg);
         }
     }
 
