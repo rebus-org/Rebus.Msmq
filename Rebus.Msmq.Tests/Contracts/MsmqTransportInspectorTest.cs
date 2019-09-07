@@ -6,6 +6,5 @@ namespace Rebus.Msmq.Tests.Contracts
     [TestFixture]
     public class MsmqTransportInspectorTest : TransportInspectorTest<MsmqTransportInspectorFactory>
     {
-
     }
 }
