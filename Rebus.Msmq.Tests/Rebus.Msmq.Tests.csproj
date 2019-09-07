@@ -5,7 +5,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rebus.Msmq.Tests</RootNamespace>
     <AssemblyName>Rebus.Msmq.Tests</AssemblyName>
-    <TargetFrameworks>net45;net46</TargetFrameworks>
+    <TargetFrameworks>net46</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
