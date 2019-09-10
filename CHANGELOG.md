@@ -31,3 +31,9 @@
 
 * Update to Rebus 5
 * Target .NET 4.5 and .NET 4.6
+
+## 5.1.0
+
+* Enable custom serialization of headers by introducing the `IMsmqHeaderSerializer` service - thanks [hjalle]
+
+[hjalle]: https://github.com/hjalle
