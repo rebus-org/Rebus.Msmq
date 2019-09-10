@@ -23,7 +23,8 @@ namespace Rebus.Config
             configurer.Register(c =>
             {
                 var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();
-                var transport = new MsmqTransport(inputQueueName, rebusLoggerFactory);
+                var extensionDeserializer = c.Has<IMsmqHeaderSerializer>(false) ? c.Get<IMsmqHeaderSerializer>() : new ExtensionHeaderSerializer();
+                var transport = new MsmqTransport(inputQueueName, rebusLoggerFactory, extensionDeserializer);
                 builder.Configure(transport);
                 return transport;
             });
@@ -39,11 +40,11 @@ namespace Rebus.Config
             if (configurer == null) throw new ArgumentNullException(nameof(configurer));
 
             var builder = new MsmqTransportConfigurationBuilder();
-
             configurer.Register(c =>
             {
                 var rebusLoggerFactory = c.Get<IRebusLoggerFactory>();
-                var transport = new MsmqTransport(null, rebusLoggerFactory);
+                var extensionDeserializer = c.Has<IMsmqHeaderSerializer>(false) ? c.Get<IMsmqHeaderSerializer>() : new ExtensionHeaderSerializer();
+                var transport = new MsmqTransport(null, rebusLoggerFactory, extensionDeserializer);
                 builder.Configure(transport);
                 return transport;
             });

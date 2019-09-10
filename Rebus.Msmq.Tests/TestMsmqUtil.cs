@@ -47,7 +47,7 @@ namespace Rebus.Msmq.Tests
 
         static async Task SendMessageTo(string queueName)
         {
-            using (var transport = new MsmqTransport(queueName, new ConsoleLoggerFactory(false)))
+            using (var transport = new MsmqTransport(queueName, new ConsoleLoggerFactory(false), new ExtensionHeaderSerializer()))
             {
                 using (var scope = new RebusTransactionScope())
                 {
