@@ -27,7 +27,7 @@ namespace Rebus.Msmq
         const string CurrentTransactionKey = "msmqtransport-messagequeuetransaction";
         const string CurrentOutgoingQueuesKey = "msmqtransport-outgoing-messagequeues";
         readonly List<Action<MessageQueue>> _newQueueCallbacks = new List<Action<MessageQueue>>();
-        private readonly IMsmqHeaderSerializer _msmqHeaderSerializer;
+        readonly IMsmqHeaderSerializer _msmqHeaderSerializer;
         readonly string _inputQueueName;
         readonly ILog _log;
 
@@ -218,7 +218,7 @@ namespace Rebus.Msmq
                 context.OnCompleted(async () => messageQueueTransaction.Commit());
                 context.OnDisposed(() => message.Dispose());
 
-                var headers = _msmqHeaderSerializer.Deserialize(message);
+                var headers = _msmqHeaderSerializer.Deserialize(message) ?? new Dictionary<string, string>();
                 var body = new byte[message.BodyStream.Length];
 
                 await message.BodyStream.ReadAsync(body, 0, body.Length, cancellationToken);
@@ -354,21 +354,6 @@ namespace Rebus.Msmq
             }
 
             return _inputQueue;
-        }
-
-        class ExtensionSerializer
-        {
-            readonly HeaderSerializer _utf8HeaderSerializer = new HeaderSerializer { Encoding = Encoding.UTF8 };
-
-            public byte[] Serialize(Dictionary<string, string> headers)
-            {
-                return _utf8HeaderSerializer.Serialize(headers);
-            }
-
-            public Dictionary<string, string> Deserialize(byte[] bytes)
-            {
-                return _utf8HeaderSerializer.Deserialize(bytes);
-            }
         }
 
         /// <summary>

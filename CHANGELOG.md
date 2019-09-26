@@ -36,4 +36,8 @@
 
 * Enable custom serialization of headers by introducing the `IMsmqHeaderSerializer` service - thanks [hjalle]
 
+## 5.1.1
+
+* Graceful handling of cases where headers of incoming message are null
+
 [hjalle]: https://github.com/hjalle

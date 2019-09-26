@@ -2,6 +2,7 @@
 using Rebus.Logging;
 using Rebus.Msmq;
 using Rebus.Transport;
+// ReSharper disable UnusedMember.Global
 
 namespace Rebus.Config
 {

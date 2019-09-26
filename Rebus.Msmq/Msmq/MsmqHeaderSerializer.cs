@@ -27,6 +27,5 @@ namespace Rebus.Msmq
         {
             return _utf8HeaderSerializer.Deserialize(msmqMessage.Extension);
         }
-
     }
 }
