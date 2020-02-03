@@ -140,7 +140,7 @@ namespace Rebus.Msmq
 
                 transaction.Begin();
 
-                context.OnCommitted(async () => transaction.Commit());
+                context.OnCommitted(async ctx => transaction.Commit());
 
                 return transaction;
             });
@@ -149,7 +149,7 @@ namespace Rebus.Msmq
             {
                 var messageQueues = new ConcurrentDictionary<string, MessageQueue>(StringComparer.InvariantCultureIgnoreCase);
 
-                context.OnDisposed(() =>
+                context.OnDisposed(ctx =>
                 {
                     foreach (var messageQueue in messageQueues.Values)
                     {
@@ -202,7 +202,7 @@ namespace Rebus.Msmq
             var messageQueueTransaction = new MessageQueueTransaction();
             messageQueueTransaction.Begin();
 
-            context.OnDisposed(() => messageQueueTransaction.Dispose());
+            context.OnDisposed(ctx => messageQueueTransaction.Dispose());
             context.Items[CurrentTransactionKey] = messageQueueTransaction;
 
             try
@@ -215,8 +215,8 @@ namespace Rebus.Msmq
                     return null;
                 }
 
-                context.OnCompleted(async () => messageQueueTransaction.Commit());
-                context.OnDisposed(() => message.Dispose());
+                context.OnCompleted(async ctx => messageQueueTransaction.Commit());
+                context.OnDisposed(ctx => message.Dispose());
 
                 var headers = _msmqHeaderSerializer.Deserialize(message) ?? new Dictionary<string, string>();
                 var body = new byte[message.BodyStream.Length];

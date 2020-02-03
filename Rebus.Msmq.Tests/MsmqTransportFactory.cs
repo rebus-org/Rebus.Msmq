@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Rebus.Extensions;
 using Rebus.Logging;
 using Rebus.Tests.Contracts.Transports;
 using Rebus.Transport;
@@ -43,7 +42,11 @@ namespace Rebus.Msmq.Tests
             _disposables.ForEach(d => d.Dispose());
             _disposables.Clear();
 
-            _queuesToDelete.ForEach(MsmqUtil.Delete);
+            foreach (var queue in _queuesToDelete)
+            {
+                MsmqUtil.Delete(queue);
+            }
+            
             _queuesToDelete.Clear();
         }
     }
