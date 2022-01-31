@@ -145,7 +145,7 @@ in order to specify a private queue named 'someQueue' on the machine with IP 10.
 
             try
             {
-                log?.Info("Queue '{0}' does not exist - it will be created now", inputQueuePath);
+                log?.Info("Queue {queueName} does not exist - it will be created now", inputQueuePath);
 
                 var newQueue = MessageQueue.Create(inputQueuePath, true);
                 var administratorAccountName = GetAdministratorsGroupAccountName();

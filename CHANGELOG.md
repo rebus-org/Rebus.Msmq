@@ -34,4 +34,7 @@
 ## 6.0.0
 * Update to Rebus 6
 
+## 6.1.0
+* Fix structured logging
+
 [hjalle]: https://github.com/hjalle

@@ -72,7 +72,7 @@ namespace Rebus.Msmq
         {
             if (_inputQueueName != null)
             {
-                _log.Info("Initializing MSMQ transport - input queue: '{0}'", _inputQueueName);
+                _log.Info("Initializing MSMQ transport - input queue: {queueName}", _inputQueueName);
 
                 GetInputQueue();
             }
@@ -114,11 +114,11 @@ namespace Rebus.Msmq
         {
             if (!MsmqUtil.QueueExists(_inputQueueName))
             {
-                _log.Info("Purging {0} (but the queue doesn't exist...)", _inputQueueName);
+                _log.Info("Purging {queueName} (but the queue doesn't exist...)", _inputQueueName);
                 return;
             }
 
-            _log.Info("Purging {0}", _inputQueueName);
+            _log.Info("Purging {queueName}", _inputQueueName);
             MsmqUtil.PurgeQueue(_inputQueueName);
         }
 
@@ -234,14 +234,14 @@ namespace Rebus.Msmq
 
                 if (exception.MessageQueueErrorCode == MessageQueueErrorCode.InvalidHandle)
                 {
-                    _log.Warn("Queue handle for '{0}' was invalid - will try to reinitialize the queue", _inputQueueName);
+                    _log.Warn("Queue handle for {queueName} was invalid - will try to reinitialize the queue", _inputQueueName);
                     ReinitializeInputQueue();
                     return null;
                 }
 
                 if (exception.MessageQueueErrorCode == MessageQueueErrorCode.QueueDeleted)
                 {
-                    _log.Warn("Queue '{0}' was deleted - will not receive any more messages", _inputQueueName);
+                    _log.Warn("Queue {queueName} was deleted - will not receive any more messages", _inputQueueName);
                     return null;
                 }
 
@@ -306,7 +306,7 @@ namespace Rebus.Msmq
                 }
                 catch (Exception exception)
                 {
-                    _log.Warn("An error occurred when closing/disposing the queue handle for '{0}': {1}", _inputQueueName, exception);
+                    _log.Warn(exception, "An error occurred when closing/disposing the queue handle for {queueName}", _inputQueueName);
                 }
                 finally
                 {
