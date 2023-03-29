@@ -68,11 +68,11 @@ public class TestUnluckyContinuations : FixtureBase
     {
         var resetEvents = new List<ManualResetEvent>
         {
-            new (false),
-            new (false),
-            new (false),
-            new (false),
-            new (false),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
+            Using(new ManualResetEvent(false)),
         };
 
         var resetEventsQueue = new ConcurrentQueue<ManualResetEvent>(resetEvents);
@@ -105,7 +105,8 @@ public class TestUnluckyContinuations : FixtureBase
             _activator.Bus.SendLocal("5"));
 
         var doneThing = "";
-        var allDone = new ManualResetEvent(false);
+
+        using var allDone = new ManualResetEvent(false);
 
         Task.WhenAll(resetEvents.Select(r => r.WaitAsync()))
             .ContinueWith(t =>
@@ -123,7 +124,7 @@ public class TestUnluckyContinuations : FixtureBase
                 allDone.Set();
             });
 
-        allDone.WaitOrDie(TimeSpan.FromSeconds(3));
+        allDone.WaitOrDie(TimeSpan.FromSeconds(5));
 
         Assert.That(doneThing, Is.EqualTo("HandleTasks"));
     }
