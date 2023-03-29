@@ -6,31 +6,30 @@ using Rebus.Activation;
 using Rebus.Config;
 using Rebus.Tests.Contracts;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Tests;
+
+[TestFixture]
+public class MsmqShutdownTime : FixtureBase
 {
-    [TestFixture]
-    public class MsmqShutdownTime : FixtureBase
+    [Test]
+    public void CheckReceiveTimeout()
     {
-        [Test]
-        public void CheckReceiveTimeout()
+        var stopwatch = new Stopwatch();
+
+        using (var activator = new BuiltinHandlerActivator())
         {
-            var stopwatch = new Stopwatch();
+            Configure.With(activator)
+                .Transport(t => t.UseMsmq(TestConfig.GetName("receive-timeout")))
+                .Start();
 
-            using (var activator = new BuiltinHandlerActivator())
-            {
-                Configure.With(activator)
-                    .Transport(t => t.UseMsmq(TestConfig.GetName("receive-timeout")))
-                    .Start();
+            Thread.Sleep(1000);
 
-                Thread.Sleep(1000);
-
-                stopwatch.Start();
-            }
-
-            stopwatch.Stop();
-            var shutdownTime = stopwatch.Elapsed;
-
-            Console.WriteLine($"Shutdown took {shutdownTime}");
+            stopwatch.Start();
         }
+
+        stopwatch.Stop();
+        var shutdownTime = stopwatch.Elapsed;
+
+        Console.WriteLine($"Shutdown took {shutdownTime}");
     }
 }

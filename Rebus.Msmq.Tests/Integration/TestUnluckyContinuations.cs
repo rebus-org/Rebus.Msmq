@@ -10,117 +10,121 @@ using Rebus.Config;
 using Rebus.Tests.Contracts;
 using Rebus.Tests.Contracts.Extensions;
 
-namespace Rebus.Msmq.Tests.Integration
+namespace Rebus.Msmq.Tests.Integration;
+
+[TestFixture]
+[Description("Tests a scenario where a handler that awaits stuff is unfortunate and ends up being delayed because of the queue receive polling timeout")]
+public class TestUnluckyContinuations : FixtureBase
 {
-    [TestFixture]
-    [Description("Tests a scenario where a handler that awaits stuff is unfortunate and ends up being delayed because of the queue receive polling timeout")]
-    public class TestUnluckyContinuations : FixtureBase
+    BuiltinHandlerActivator _activator;
+    IBusStarter _starter;
+
+    protected override void SetUp()
     {
-        BuiltinHandlerActivator _activator;
+        _activator = Using(new BuiltinHandlerActivator());
 
-        protected override void SetUp()
-        {
-            _activator = Using(new BuiltinHandlerActivator());
+        var queueName = TestConfig.GetName("unlucky_continuations");
 
-            var queueName = TestConfig.GetName("unlucky_continuations");
+        MsmqUtil.PurgeQueue(queueName);
 
-            MsmqUtil.PurgeQueue(queueName);
-
-            Configure.With(_activator)
-                .Transport(t => t.UseMsmq(queueName))
-                .Options(o =>
-                {
-                    o.SetNumberOfWorkers(1);
-                    o.SetMaxParallelism(5);
-                })
-                .Start();
-        }
-
-        [Test]
-        public void MessageHandlingTimeDoesNotSufferEvenThoughTransportBlocksOnAwaitForALongTime()
-        {
-            var gotMessage = new ManualResetEvent(false);
-
-            _activator.Handle<string>(async s =>
+        _starter = Configure.With(_activator)
+            .Transport(t => t.UseMsmq(queueName))
+            .Options(o =>
             {
-                Console.WriteLine("waiting 50 ms");
-                await Task.Delay(50);
+                o.SetNumberOfWorkers(1);
+                o.SetMaxParallelism(5);
+            })
+            .Create();
+    }
 
-                Console.WriteLine("waiting 50 ms");
-                await Task.Delay(50);
+    [Test]
+    public void MessageHandlingTimeDoesNotSufferEvenThoughTransportBlocksOnAwaitForALongTime()
+    {
+        var gotMessage = new ManualResetEvent(false);
 
-                Console.WriteLine("waiting 50 ms");
-                await Task.Delay(50);
+        _activator.Handle<string>(async s =>
+        {
+            Console.WriteLine("waiting 50 ms");
+            await Task.Delay(50);
 
-                gotMessage.Set();
+            Console.WriteLine("waiting 50 ms");
+            await Task.Delay(50);
+
+            Console.WriteLine("waiting 50 ms");
+            await Task.Delay(50);
+
+            gotMessage.Set();
+        });
+
+        _starter.Start();
+
+        _activator.Bus.SendLocal("hej!").Wait();
+
+        gotMessage.WaitOrDie(TimeSpan.FromSeconds(1));
+    }
+
+    [Test]
+    public void HandlersWithAwaitAreExecutedInParallel()
+    {
+        var resetEvents = new List<ManualResetEvent>
+        {
+            new (false),
+            new (false),
+            new (false),
+            new (false),
+            new (false),
+        };
+
+        var resetEventsQueue = new ConcurrentQueue<ManualResetEvent>(resetEvents);
+        var idCounter = 0;
+
+        _activator.Handle<string>(async message =>
+        {
+            var id = Interlocked.Increment(ref idCounter);
+
+            Printt($"operation {id} (msg: {message}) sleeping 1s...");
+
+            await MeasuredDelay(1000);
+
+            Printt($"operation {id} done sleeping - setting reset event");
+
+            var resetEvent = resetEventsQueue.GetNextOrThrow();
+
+            Printt($"operation {id} set the reset event");
+
+            resetEvent.Set();
+        });
+
+        _starter.Start();
+
+        Task.WaitAll(
+            _activator.Bus.SendLocal("1"),
+            _activator.Bus.SendLocal("2"),
+            _activator.Bus.SendLocal("3"),
+            _activator.Bus.SendLocal("4"),
+            _activator.Bus.SendLocal("5"));
+
+        var doneThing = "";
+        var allDone = new ManualResetEvent(false);
+
+        Task.WhenAll(resetEvents.Select(r => r.WaitAsync()))
+            .ContinueWith(t =>
+            {
+                Printt("HANDLE TASKS DONE!");
+                doneThing = "HandleTasks";
+                allDone.Set();
             });
 
-            _activator.Bus.SendLocal("hej!").Wait();
-
-            gotMessage.WaitOrDie(TimeSpan.FromSeconds(1));
-        }
-
-        [Test]
-        public void HandlersWithAwaitAreExecutedInParallel()
-        {
-            var resetEvents = new List<ManualResetEvent>
+        Task.Delay(4500)
+            .ContinueWith(t =>
             {
-                new ManualResetEvent(false),
-                new ManualResetEvent(false),
-                new ManualResetEvent(false),
-                new ManualResetEvent(false),
-                new ManualResetEvent(false),
-            };
-
-            var resetEventsQueue = new ConcurrentQueue<ManualResetEvent>(resetEvents);
-            var idCounter = 0;
-
-            _activator.Handle<string>(async message =>
-            {
-                var id = Interlocked.Increment(ref idCounter);
-
-                Printt($"operation {id} (msg: {message}) sleeping 1s...");
-
-                await MeasuredDelay(1000);
-
-                Printt($"operation {id} done sleeping - setting reset event");
-
-                var resetEvent = resetEventsQueue.GetNextOrThrow();
-
-                Printt($"operation {id} set the reset event");
-
-                resetEvent.Set();
+                Printt("TIME IS OUT!");
+                doneThing = "TIMEOUT!";
+                allDone.Set();
             });
 
-            Task.WaitAll(
-                _activator.Bus.SendLocal("1"),
-                _activator.Bus.SendLocal("2"),
-                _activator.Bus.SendLocal("3"),
-                _activator.Bus.SendLocal("4"),
-                _activator.Bus.SendLocal("5"));
+        allDone.WaitOrDie(TimeSpan.FromSeconds(3));
 
-            var doneThing = "";
-            var allDone = new ManualResetEvent(false);
-
-            Task.WhenAll(resetEvents.Select(r => r.WaitAsync()))
-                .ContinueWith(t =>
-                {
-                    Printt("HANDLE TASKS DONE!");
-                    doneThing = "HandleTasks";
-                    allDone.Set();
-                });
-
-            Task.Delay(4500)
-                .ContinueWith(t =>
-                {
-                    Printt("TIME IS OUT!");
-                    doneThing = "TIMEOUT!";
-                    allDone.Set();
-                });
-
-            allDone.WaitOrDie(TimeSpan.FromSeconds(3));
-
-            Assert.That(doneThing, Is.EqualTo("HandleTasks"));
-        }
+        Assert.That(doneThing, Is.EqualTo("HandleTasks"));
     }
 }

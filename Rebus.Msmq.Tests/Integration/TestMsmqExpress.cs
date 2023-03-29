@@ -13,73 +13,74 @@ using Rebus.Tests.Contracts;
 
 #pragma warning disable 1998
 
-namespace Rebus.Msmq.Tests.Integration
+namespace Rebus.Msmq.Tests.Integration;
+
+[TestFixture]
+public class TestMsmqExpress : FixtureBase
 {
-    [TestFixture]
-    public class TestMsmqExpress : FixtureBase
+    BuiltinHandlerActivator _activator;
+    IBusStarter _starter;
+
+    protected override void SetUp()
     {
-        BuiltinHandlerActivator _activator;
-        IBus _bus;
+        var queueName = TestConfig.GetName("expressperf");
 
-        protected override void SetUp()
+        MsmqUtil.Delete(queueName);
+
+        _activator = Using(new BuiltinHandlerActivator());
+
+        _starter = Configure.With(_activator)
+            .Logging(l => l.ColoredConsole(LogLevel.Info))
+            .Transport(t => t.UseMsmq(queueName))
+            .Options(o => o.SetMaxParallelism(100))
+            .Create();
+    }
+
+    [TestCase(10000, true, Ignore = "takes a long time")]
+    [TestCase(10000, false, Ignore = "takes a long time")]
+    [TestCase(100, true)]
+    [TestCase(100, false)]
+    public async Task TestPerformance(int messageCount, bool express)
+    {
+        var receivedMessages = 0L;
+        _activator.Handle<object>(async msg => Interlocked.Increment(ref receivedMessages));
+
+        var bus = _starter.Start();
+
+        bus.Advanced.Workers.SetNumberOfWorkers(0);
+
+        await Task.WhenAll(Enumerable.Range(0, messageCount)
+            .Select(i => express ? (object)new ExpressMessage() : new NormalMessage())
+            .Select(msg => bus.SendLocal(msg)));
+
+        var stopwatch = Stopwatch.StartNew();
+
+        bus.Advanced.Workers.SetNumberOfWorkers(5);
+
+        while (Interlocked.Read(ref receivedMessages) < messageCount)
         {
-            var queueName = TestConfig.GetName("expressperf");
-
-            MsmqUtil.Delete(queueName);
-
-            _activator = Using(new BuiltinHandlerActivator());
-
-            _bus = Configure.With(_activator)
-                .Logging(l => l.ColoredConsole(LogLevel.Info))
-                .Transport(t => t.UseMsmq(queueName))
-                .Options(o => o.SetMaxParallelism(100))
-                .Start();
+            Thread.Sleep(1000);
+            Console.WriteLine("Got {0} messages...", Interlocked.Read(ref receivedMessages));
         }
 
-        [TestCase(10000, true, Ignore = "takes a long time")]
-        [TestCase(10000, false, Ignore = "takes a long time")]
-        [TestCase(100, true)]
-        [TestCase(100, false)]
-        public async Task TestPerformance(int messageCount, bool express)
+        var totalSeconds = stopwatch.Elapsed.TotalSeconds;
+        Console.WriteLine("Received {0} messages in {1:0.0} s - that's {2:0.0} msg/s", messageCount, totalSeconds, messageCount / totalSeconds);
+    }
+
+    [Express]
+    class ExpressMessage
+    {
+    }
+
+    class NormalMessage
+    {
+    }
+
+    class ExpressAttribute : HeaderAttribute
+    {
+        public ExpressAttribute()
+            : base(Headers.Express, "")
         {
-            var receivedMessages = 0L;
-            _activator.Handle<object>(async msg => Interlocked.Increment(ref receivedMessages));
-
-            _bus.Advanced.Workers.SetNumberOfWorkers(0);
-
-            await Task.WhenAll(Enumerable.Range(0, messageCount)
-                .Select(i => express ? (object)new ExpressMessage() : new NormalMessage())
-                .Select(msg => _bus.SendLocal(msg)));
-
-            var stopwatch = Stopwatch.StartNew();
-
-            _bus.Advanced.Workers.SetNumberOfWorkers(5);
-
-            while (Interlocked.Read(ref receivedMessages) < messageCount)
-            {
-                Thread.Sleep(1000);
-                Console.WriteLine("Got {0} messages...", Interlocked.Read(ref receivedMessages));
-            }
-
-            var totalSeconds = stopwatch.Elapsed.TotalSeconds;
-            Console.WriteLine("Received {0} messages in {1:0.0} s - that's {2:0.0} msg/s", messageCount, totalSeconds, messageCount / totalSeconds);
-        }
-
-        [Express]
-        class ExpressMessage
-        {
-        }
-
-        class NormalMessage
-        {
-        }
-
-        class ExpressAttribute : HeaderAttribute
-        {
-            public ExpressAttribute()
-                : base(Headers.Express, "")
-            {
-            }
         }
     }
 }

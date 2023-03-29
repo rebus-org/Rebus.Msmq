@@ -11,45 +11,47 @@ using Rebus.Tests.Contracts.Extensions;
 
 #pragma warning disable 1998
 
-namespace Rebus.Msmq.Tests.Integration
+namespace Rebus.Msmq.Tests.Integration;
+
+[TestFixture]
+public class TestOneWayClient : FixtureBase
 {
-    [TestFixture]
-    public class TestOneWayClient : FixtureBase
+    BuiltinHandlerActivator _server;
+    string _serverInputQueueName;
+    IBusStarter _serverStarter;
+    IBus _client;
+
+    protected override void SetUp()
     {
-        BuiltinHandlerActivator _server;
-        string _serverInputQueueName;
-        IBus _client;
-
-        protected override void SetUp()
-        {
-            _serverInputQueueName = TestConfig.GetName("server");
+        _serverInputQueueName = TestConfig.GetName("server");
             
-            _server = Using(new BuiltinHandlerActivator());
+        _server = Using(new BuiltinHandlerActivator());
 
-            Configure.With(_server)
-                .Transport(t => t.UseMsmq(_serverInputQueueName))
-                .Start();
+        _serverStarter = Configure.With(_server)
+            .Transport(t => t.UseMsmq(_serverInputQueueName))
+            .Create();
 
-            _client = Configure.With(Using(new BuiltinHandlerActivator()))
-                .Transport(t => t.UseMsmqAsOneWayClient())
-                .Routing(r => r.TypeBased().Map<string>(_serverInputQueueName))
-                .Start();
-        }
+        _client = Configure.With(Using(new BuiltinHandlerActivator()))
+            .Transport(t => t.UseMsmqAsOneWayClient())
+            .Routing(r => r.TypeBased().Map<string>(_serverInputQueueName))
+            .Start();
+    }
 
-        [Test]
-        public async Task OneWayClientWorks()
+    [Test]
+    public async Task OneWayClientWorks()
+    {
+        var gotIt = new ManualResetEvent(false);
+
+        _server.Handle<string>(async str =>
         {
-            var gotIt = new ManualResetEvent(false);
+            Console.WriteLine($"Got string: {str}");
+            gotIt.Set();
+        });
 
-            _server.Handle<string>(async str =>
-            {
-                Console.WriteLine($"Got string: {str}");
-                gotIt.Set();
-            });
+        _serverStarter.Start();
 
-            await _client.Send("w000000h000000!!!!1111");
+        await _client.Send("w000000h000000!!!!1111");
 
-            gotIt.WaitOrDie(TimeSpan.FromSeconds(3));
-        }
+        gotIt.WaitOrDie(TimeSpan.FromSeconds(3));
     }
 }

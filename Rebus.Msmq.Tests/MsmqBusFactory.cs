@@ -7,35 +7,34 @@ using Rebus.Config;
 using Rebus.Tests.Contracts;
 using Rebus.Tests.Contracts.Transports;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Tests;
+
+public class MsmqBusFactory : IBusFactory
 {
-    public class MsmqBusFactory : IBusFactory
+    readonly List<IDisposable> _stuffToDispose = new List<IDisposable>();
+
+    public IBus GetBus<TMessage>(string inputQueueAddress, Func<TMessage, Task> handler)
     {
-        readonly List<IDisposable> _stuffToDispose = new List<IDisposable>();
+        var queueName = TestConfig.GetName(inputQueueAddress);
+        MsmqUtil.Delete(queueName);
 
-        public IBus GetBus<TMessage>(string inputQueueAddress, Func<TMessage, Task> handler)
-        {
-            var queueName = TestConfig.GetName(inputQueueAddress);
-            MsmqUtil.Delete(queueName);
+        var builtinHandlerActivator = new BuiltinHandlerActivator();
 
-            var builtinHandlerActivator = new BuiltinHandlerActivator();
+        builtinHandlerActivator.Handle(handler);
 
-            builtinHandlerActivator.Handle(handler);
+        var bus = Configure.With(builtinHandlerActivator)
+            .Transport(t => t.UseMsmq(queueName))
+            .Options(o => o.SetNumberOfWorkers(10))
+            .Start();
 
-            var bus = Configure.With(builtinHandlerActivator)
-                .Transport(t => t.UseMsmq(queueName))
-                .Options(o => o.SetNumberOfWorkers(10))
-                .Start();
+        _stuffToDispose.Add(bus);
 
-            _stuffToDispose.Add(bus);
+        return bus;
+    }
 
-            return bus;
-        }
-
-        public void Cleanup()
-        {
-            _stuffToDispose.ForEach(d => d.Dispose());
-            _stuffToDispose.Clear();
-        }
+    public void Cleanup()
+    {
+        _stuffToDispose.ForEach(d => d.Dispose());
+        _stuffToDispose.Clear();
     }
 }

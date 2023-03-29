@@ -2,15 +2,14 @@
 using System.Text;
 using Rebus.Messages;
 
-namespace Rebus.Msmq.Tests
+namespace Rebus.Msmq.Tests;
+
+public static class TransportMessageHelpers
 {
-    public static class TransportMessageHelpers
+    public static TransportMessage FromString(string body)
     {
-        public static TransportMessage FromString(string body)
-        {
-            var bytes = Encoding.UTF8.GetBytes(body);
-            var headers = new Dictionary<string, string>();
-            return new TransportMessage(headers, bytes);
-        }
+        var bytes = Encoding.UTF8.GetBytes(body);
+        var headers = new Dictionary<string, string>();
+        return new TransportMessage(headers, bytes);
     }
 }

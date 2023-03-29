@@ -4,30 +4,29 @@ using System.Threading.Tasks;
 using Rebus.Transport;
 #pragma warning disable 1998
 
-namespace Rebus.Msmq
+namespace Rebus.Msmq;
+
+class MsmqTransportInspector : ITransportInspector
 {
-    class MsmqTransportInspector : ITransportInspector
+    readonly string _queueName;
+
+    public MsmqTransportInspector(string queueName)
     {
-        readonly string _queueName;
+        _queueName = queueName;
+    }
 
-        public MsmqTransportInspector(string queueName)
+    public async Task<Dictionary<string, object>> GetProperties(CancellationToken cancellationToken)
+    {
+        return new Dictionary<string, object>
         {
-            _queueName = queueName;
-        }
+            {TransportInspectorPropertyKeys.QueueLength, GetCount().ToString()}
+        };
+    }
 
-        public async Task<Dictionary<string, object>> GetProperties(CancellationToken cancellationToken)
-        {
-            return new Dictionary<string, object>
-            {
-                {TransportInspectorPropertyKeys.QueueLength, GetCount().ToString()}
-            };
-        }
+    int GetCount()
+    {
+        var path = MsmqUtil.GetPath(_queueName);
 
-        int GetCount()
-        {
-            var path = MsmqUtil.GetPath(_queueName);
-
-            return MsmqUtil.GetCount(path);
-        }
+        return MsmqUtil.GetCount(path);
     }
 }
