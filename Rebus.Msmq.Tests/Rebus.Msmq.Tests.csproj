@@ -8,7 +8,7 @@
 		<Reference Include="System.Messaging" />
 		<ProjectReference Include="..\Rebus.Msmq\Rebus.Msmq.csproj" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.4.2" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
 		<PackageReference Include="rebus.tests.contracts" Version="8.0.0-alpha01" />
 	</ItemGroup>
 </Project>
