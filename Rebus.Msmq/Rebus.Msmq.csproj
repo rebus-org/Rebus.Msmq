@@ -28,7 +28,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="rebus" Version="8.0.0-alpha01" />
+		<PackageReference Include="rebus" Version="8.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="System.Messaging" />

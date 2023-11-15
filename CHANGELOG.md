@@ -37,7 +37,7 @@
 ## 6.1.0
 * Fix structured logging
 
-## 7.0.0-alpha01
+## 7.0.0
 * Update to Rebus 8
 
 [hjalle]: https://github.com/hjalle
